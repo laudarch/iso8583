@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "iso8583.h"
 
@@ -194,7 +195,7 @@ static inline int check_pad(char pad, unsigned int compress)
 static inline int to_hex(unsigned char *data, unsigned char *bin, unsigned int size)
 {
 	int i;
-	int begin = 0;
+	/*int begin = 0;*/
 
 	for (i = 0; i < size; i++) {
 		unsigned int byte = bin[i / 2];
@@ -469,7 +470,8 @@ static inline int to_userdata(struct iso8583 *handle, unsigned int index, unsign
 {
 	struct iso8583_field *field = handle->fields[index] ? handle->fields[index] : &default_fields[index];		
 	struct iso8583_data *user_data;
-	unsigned int iso8583_size, user_size;
+	unsigned int iso8583_size;
+	unsigned int  user_size;
 	int ret;
 
 	ret = get_8583size_from_8583data(&iso8583_size, data, *size, field->compress, field->type, field->size);				
@@ -758,7 +760,7 @@ int iso8583_unpack(struct iso8583 *handle, unsigned char *data, unsigned int *si
 	unsigned int unpacked_size, left_size;
 	unsigned char *bitmap;
 	unsigned int bitmap_n = 64;			  /* default */
-	unsigned int bit;
+	/*unsigned int bit;*/
 
 	if (!handle) {
 		snprintf(handle->error, ISO8583_ERROR_SIZE, "iso8583_unpack() argument error! the ptr of handle is null!");
@@ -786,10 +788,10 @@ int iso8583_unpack(struct iso8583 *handle, unsigned char *data, unsigned int *si
 
 	if (bitmap_get_bit(bitmap, 1)) {
 		bitmap_n = 16;	
-		iso8583_set(handle, 1, "1", 1);
+		iso8583_set(handle, 1, (unsigned char *)"1", 1);
 	} else {
 		bitmap_n = 8;
-		iso8583_set(handle, 1, "0", 1);
+		iso8583_set(handle, 1, (unsigned char *)"0", 1);
 	}
 
 	if (left_size < bitmap_n) {
