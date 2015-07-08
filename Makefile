@@ -1,21 +1,19 @@
-CC = gcc
-LD = gcc
+SRCS=		luaiso8583.c iso8583.c
+LIB=		iso8583
 
-CFLAGS = -g -fPIC
-LDFLAGS = -shared -llua
+LUAVER=		`lua -v 2>&1 | cut -c 5-7`
 
-TARGET = iso8583.so
+CFLAGS+=	-O3 -Wall -fPIC -I/usr/include -I/usr/include/lua${LUAVER} \
+		-D_GNU_SOURCE
+LDADD+=		-L/usr/lib
 
-OBJS = iso8583.o luaiso8583.o
+LIBDIR=		/usr/local/lib/lua/${LUAVER}
 
-$(TARGET):$(OBJS)
-	$(LD) -o $@ $^ $(LDFLAGS)
-
-$(OBJS):%.o:%.c
-	$(CC) -c $< $(CFLAGS)
-
-.PHONY:clean
+${LIB}.so:	${SRCS:.c=.o}
+		cc -shared -o ${LIB}.so ${CFLAGS} ${SRCS:.c=.o} ${LDADD}
 
 clean:
-	-rm -rf $(TARGET) $(OBJS)
-
+		rm -f *.o *.so
+install:
+	install -d ${DESTDIR}${LIBDIR}
+	install ${LIB}.so ${DESTDIR}${LIBDIR}
