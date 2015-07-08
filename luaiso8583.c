@@ -124,7 +124,7 @@ static int lua_iso8583_new(lua_State *L)
 						// get pad;
 						lua_getfield(L, -1, "pad");
 
-						if (!lua_isstring(L, -1) || !lua_objlen(L, -1)) {
+						if (!lua_isstring(L, -1) || !lua_rawlen(L, -1)) {
 							lua_pushnil(L);
 							snprintf(error, BUFSIZ, "field %d error! the pad is invalid!", i);
 							lua_pushstring(L, error);
@@ -315,15 +315,19 @@ int luaopen_iso8583(lua_State *L)
 	lua_pushvalue(L, -1);
 	lua_setfield(L, -2, "__index");
 
-	luaL_register(L, NULL, iso8583lib_m);
-
-	luaL_register(L, "iso8583", iso8583lib_f);
+#if LUA_VERSION_NUM >= 502
+        luaL_setfuncs(L, iso8583lib_f, 0);
+        luaL_setfuncs(L, iso8583lib_m, 0);
+#else
+        luaL_register(L, NULL, iso8583lib_f);
+        luaL_register(L, "iso8583", iso8583lib_m);
+#endif
 
 #define set_constant(name, value) lua_pushstring(L, name); lua_pushinteger(L, value); lua_settable(L, -3);
 
 	set_constant("LEFT",   ISO8583_L);
 	set_constant("RIGHT",  ISO8583_R);
-	set_constant("L",	   ISO8583_L);
+	set_constant("L",      ISO8583_L);
 	set_constant("R",      ISO8583_R);
 
 	set_constant("ZIP",    ISO8583_Z);
